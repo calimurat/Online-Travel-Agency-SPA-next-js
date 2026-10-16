@@ -1,0 +1,10 @@
+'use client';
+import Link from 'next/link';
+import { Star, MapPin, ArrowUpRight, Heart } from 'lucide-react';
+import { currency } from '@/lib/format';
+
+type Product = { id: string; name: string; slug: string; location?: string; region?: string; destination?: string; duration?: string; description: string; image: string; stars?: number; rating?: string | number; reviewCount?: number; priceFrom: number; oldPrice?: number | null; boardType?: string; tags: string[] };
+export default function ProductCard({ product, type = 'hotel' }: { product: Product; type?: 'hotel' | 'tour' }) {
+ const href = type === 'hotel' ? `/hotel/${product.slug}` : `/tur/${product.slug}`;
+ return <article className="product-card"><div className="product-image-wrap"><Link href={href} className="product-image-link"><img src={product.image} alt={product.name} className="product-image"/><span className="image-chip">{type === 'hotel' ? `${product.stars ?? 4} yıldız` : product.duration}</span></Link><button type="button" className="heart-button" aria-label="Favorilere ekle" onClick={(e) => { e.currentTarget.classList.toggle('saved'); }}><Heart size={18}/></button></div><div className="product-content"><div className="product-kicker"><MapPin size={13}/>{product.location ?? product.destination ?? product.region}</div><Link href={href} className="product-title">{product.name}</Link><div className="rating-row"><span className="rating-score"><Star size={13} fill="currentColor"/>{product.rating ?? '9.1'}</span><span>{product.reviewCount ?? 120} değerlendirme</span></div><div className="tag-row">{product.tags.slice(0, 2).map(t => <span key={t}>{t}</span>)}</div><div className="product-bottom"><div>{product.oldPrice && <del>{currency(product.oldPrice)}</del>}<strong>{currency(product.priceFrom)}</strong><small>{type === 'hotel' ? '/ kişi / gece başlangıç' : '/ kişi başlangıç'}</small></div><Link href={href} className="round-arrow" aria-label={`${product.name} detayları`}><ArrowUpRight size={19}/></Link></div></div></article>;
+}

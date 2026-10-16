@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'; import { prisma } from '@/lib/prisma'; import { bookings } from '@/lib/demo-data';
+export const dynamic='force-dynamic';
+export async function GET(){try{const items=await prisma.booking.findMany({include:{customer:true,hotel:true,tour:true},orderBy:{createdAt:'desc'}});return NextResponse.json({items:items.map(b=>({id:b.code,customer:`${b.customer.firstName} ${b.customer.lastName}`,product:b.hotel?.name||b.tour?.name||b.type,destination:b.destination,type:b.type,date:b.startDate.toISOString().slice(0,10),amount:b.totalAmount,status:b.status,payment:b.paymentStatus})),mode:'database'});}catch{return NextResponse.json({items:bookings,mode:'demo'});}}

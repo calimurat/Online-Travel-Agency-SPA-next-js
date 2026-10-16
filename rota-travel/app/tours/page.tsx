@@ -1,0 +1,8 @@
+import type { Metadata } from 'next';
+import ProductCard from '@/components/product-card';
+import { getTours } from '@/lib/catalog';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: 'Turlar ve Keşif Rotaları' };
+export default async function ToursPage({searchParams}:{searchParams:Promise<{destination?:string;region?:string}>}){const params=await searchParams;const tourCatalog=await getTours();const request=(params.destination||params.region||'').trim().toLocaleLowerCase('tr');const visibleTours=request?tourCatalog.filter(t=>`${t.destination} ${t.name}`.toLocaleLowerCase('tr').includes(request)):tourCatalog;return <main className="catalog-page"><div className="catalog-banner tour-banner"><div className="container"><div className="breadcrumbs">Ana Sayfa <span>/</span> Turlar</div><div className="eyebrow light-eyebrow">YENİ HİKÂYELER BİRİKTİR</div><h1>Dünyaya biraz<br/><em>yakından bak.</em></h1><p>Her durağında başka bir hikâye olan seyahatler seni bekliyor.</p></div></div><div className="container section"><div className="section-heading"><div><div className="eyebrow"><span/> ROTA SEÇKİSİ</div><h2>Öne çıkan <em>turlar.</em></h2><p>Kültür, gastronomi ve doğa dolu yolculuklar.</p></div><Link href="/campaigns" className="text-link">Tur fırsatları <ArrowRight size={16}/></Link></div><div className="products-grid">{visibleTours.length?visibleTours.map(t=><ProductCard key={t.id} product={t} type="tour"/>):<div className="empty-catalog"><h3>Aramanıza uygun tur bulunamadı.</h3><p>Farklı bir destinasyon deneyin.</p><Link className="text-link" href="/tours">Tüm turları göster →</Link></div>}</div></div></main>}

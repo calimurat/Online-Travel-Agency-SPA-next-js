@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum BookingType {
+  HOTEL
+  TOUR
+  FLIGHT
+  CRUISE
+  PACKAGE
+}
+
+model Hotel {
+  id              String        @id @default(cuid())
+  name            String
+  slug            String        @unique
+  location        String
+  region          String
+  description     String        @db.Text
+  image            String
+  gallery         String[]      @default([])
+  stars           Int           @default(4)
+  rating          Decimal       @default(9.0) @db.Decimal(2, 1)
+  reviewCount     Int           @default(0)
+  priceFrom       Int
+  oldPrice        Int?
+  boardType       String        @default("Her Şey Dahil")
+  tags            String[]      @default([])
+  status          ProductStatus @default(DRAFT)
+  featured        Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  bookings        Booking[]
+
+  @@index([status, featured])
+  @@index([region])
+}
+
+model Tour {
+  id             String        @id @default(cuid())
+  name           String
+  slug           String        @unique
+  destination    String
+  duration       String
+  departureCity  String        @default("İstanbul")
+  description    String        @db.Text
+  itinerary      String[]      @default([])
+  image          String
+  priceFrom      Int
+  oldPrice       Int?
+  tags           String[]      @default([])
+  status         ProductStatus @default(DRAFT)
+  featured       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  bookings       Booking[]
+
+  @@index([status, featured])
+  @@index([destination])
+}
+
+model Campaign {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  subtitle    String
+  description String        @db.Text
+  image       String
+  discount    String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  status      ProductStatus @default(DRAFT)
+  featured    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Customer {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String    @unique
+  phone       String?
+  city        String?
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  type           BookingType
+  status         BookingStatus @default(PENDING)
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  hotelId        String?
+  hotel          Hotel?        @relation(fields: [hotelId], references: [id])
+  tourId         String?
+  tour           Tour?         @relation(fields: [tourId], references: [id])
+  destination    String
+  startDate      DateTime
+  endDate        DateTime?
+  guests         Int           @default(2)
+  totalAmount    Int
+  currency       String        @default("TRY")
+  paymentStatus  String        @default("Bekliyor")
+  note           String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([customerId])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  displayName  String   @default("Site Yöneticisi")
+  role         String   @default("SUPER_ADMIN")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
